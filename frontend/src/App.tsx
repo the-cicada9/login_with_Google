@@ -4,6 +4,7 @@ import Dashboard from './pages/Dashboard/index';
 import Navbar from "./components/Navbar";
 import AuthRedirect from './utils/AuthRouteRedirect';
 import Profile from './pages/Profile';
+import FeedPage from './pages/Feed';
 
 const Layout = ({ children }: any) => {
 
@@ -38,6 +39,7 @@ function App() {
       <Layout>
         <Routes>
           <Route path="/login" element={<AuthCheck><GoogleBtn /></AuthCheck>} />
+          <Route path="/user/:id" element={<AuthRedirect><FeedPage /></AuthRedirect>} />
           <Route path="/dashboard" element={<AuthRedirect><Dashboard /></AuthRedirect>} />
           <Route path='/profile' element={<AuthRedirect><Profile /></AuthRedirect>}></Route>
         </Routes>

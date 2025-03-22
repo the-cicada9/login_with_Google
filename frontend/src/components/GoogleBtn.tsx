@@ -24,7 +24,7 @@ const GoogleBtn = () => {
       if (data.user && data.token) {
         console.log(">>");
         setUser(data.user, data.token);
-        navigate('/dashboard'); // Store user in Zustand
+        navigate(`/user/${data.user.name}`); // Store user in Zustand
       }
       console.log('Backend Response:', data);
     } catch (error) {
