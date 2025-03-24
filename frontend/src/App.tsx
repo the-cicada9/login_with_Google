@@ -15,19 +15,35 @@ const Layout = ({ children }: any) => {
 
   return (
     <div>
+      <div style={{marginBottom:"90px"}}>
       {!hideNavbar && <Navbar />}
+      </div>
       {children}
     </div>
   );
 }
 
 const AuthCheck = ({ children }: any) => {
-  const user = localStorage.getItem('user');
+  const userString = localStorage.getItem('user');
   const token = localStorage.getItem('token');
 
-  // If user is logged in and tries to visit login page, redirect to dashboard
-  if (user && token) {
-    return <Navigate to="/dashboard" replace />;
+  if(!userString || !token){
+    return <>{children}</>
+  }
+
+  const user = JSON.parse(userString)
+
+  if (user?.email && user?.name) {
+    const emailPrefix = user.email.split("@")[0];
+    const oddChars = emailPrefix
+    .split("")
+    .filter((_:any, index:any) => index % 2 !== 0)
+    .join("");
+
+  // Generate a URL-friendly username
+  const dynamicUsername = `${oddChars}-${user.name.replace(/\s+/g, "").toLowerCase()}`;
+
+    return <Navigate to={`/user/${encodeURIComponent(dynamicUsername)}`} replace />;
   }
 
   return <>{children}</>;

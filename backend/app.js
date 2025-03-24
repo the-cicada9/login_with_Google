@@ -9,6 +9,7 @@ require('dotenv').config();
 const db = require('./db')
 
 var authRoutes = require('./routes/authRoutes');
+var userRoutes = require('./routes/connect/userRoutes')
 // var usersRouter = require('./routes/users');
 
 const port = process.env.PORT || 3000;
@@ -36,7 +37,7 @@ db.once('open', () => {
 
 
 app.use('/auth', authRoutes);
-// app.use('/users', usersRouter);
+app.use('/users', userRoutes);
 
 
 // ===============================
