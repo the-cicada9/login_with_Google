@@ -10,6 +10,7 @@ const db = require('./db')
 
 var authRoutes = require('./routes/authRoutes');
 var userRoutes = require('./routes/connect/userRoutes')
+var postRoutes = require("./routes/connect/postRoutes")
 // var usersRouter = require('./routes/users');
 
 const port = process.env.PORT || 3000;
@@ -38,7 +39,7 @@ db.once('open', () => {
 
 app.use('/auth', authRoutes);
 app.use('/users', userRoutes);
-
+app.use('/posts' , postRoutes)
 
 // ===============================
 
