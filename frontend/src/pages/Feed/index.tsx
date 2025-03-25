@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import  { useEffect, useState } from "react";
 import {
   Card,
   CardContent,
@@ -14,15 +14,53 @@ import FavoriteIcon from "@mui/icons-material/Favorite";
 import CommentIcon from "@mui/icons-material/Comment";
 import ShareIcon from "@mui/icons-material/Share";
 import SetPinCodeModal from "../../components/modals/setPinCode";
-import CarouselComponent from "../../components/connectUICarousel"; // Import the carousel
+// import CarouselComponent from "../../components/connectUICarousel"; // Import the carousel
 import CreatePostModal from "../../components/modals/postModal";
+import axios from "axios";
+import { toast } from "react-toastify";
+import useAuthStore from "../../store/authStore";
+import usePostStore from "../../store/postStore";
 
 const FeedCard = ({ post }: any) => {
+  const token = useAuthStore((state) => state.token);
+  const setPosts = usePostStore((state) => state.setPosts);
+
+  // console.log(posts , ">>>posts");
+  
+
+  const handleLikePost = async (postId: any) => {
+    try{
+      console.log(postId , ">>//post ki id");
+      
+      const response = await axios.post("http://localhost:3000/posts/like-unlike-post" , {postId} , {
+        headers : {Authorization : token}
+      })
+
+      
+      if (response.status === 200) {
+        setPosts((prevPosts) =>
+          prevPosts.map((post) =>
+            post.id === postId
+              ? {
+                  ...post,
+                  likes: post.likes === 0 ? 1 : response.data.liked ? post.likes + 1 : post.likes - 1,
+                }
+              : post
+          )
+        );
+
+        toast.success(response.data.message);
+      }
+    }catch(err:any){
+      console.log(err);
+      toast.error(err);
+    }
+  }
   return (
     <Card
       sx={{
         width: "100%",
-        maxWidth: 600,
+        maxWidth: 780,
         borderRadius: 2,
         boxShadow: 3,
         mb: 2,
@@ -37,7 +75,7 @@ const FeedCard = ({ post }: any) => {
               {post.name}
             </Typography>
             <Typography variant="body2" color="textSecondary">
-              {post.community} • {post.time}
+              {post.email} • {post.time}
             </Typography>
           </Box>
         </Box>
@@ -74,7 +112,7 @@ const FeedCard = ({ post }: any) => {
 
         {/* Action Buttons Section */}
         <Box display="flex" alignItems="center" gap={2} mt={2}>
-          <IconButton>
+          <IconButton onClick={() => {handleLikePost(post.id)}}>
             <FavoriteIcon
               sx={{ color: "red", fontWeight: "700", fontSize: "18px" }}
             />
@@ -105,67 +143,76 @@ const FeedCard = ({ post }: any) => {
 };
 
 const FeedPage = () => {
-  const [posts, setPosts] = useState([
-    {
-      id: 1,
-      name: "Daisy Deborah",
-      profilePic: "https://i.pravatar.cc/40?img=1",
-      community: "Awesome Community",
-      time: "57m",
-      tags: ["Python", "Robots"],
-      content:
-        "Meet our new high-tech robot - efficient, precise, and ready to take on any challenge!",
-      image:
-        "https://images.unsplash.com/photo-1534723328310-e82dad3ee43f?w=700&auto=format&fit=crop&q=60",
-      likes: "57K",
-      comments: "17K",
-      shares: "7",
-    },
-    {
-      id: 2,
-      name: "John Doe",
-      profilePic: "https://i.pravatar.cc/40?img=2",
-      community: "Tech Lovers",
-      time: "1h",
-      tags: ["AI", "Innovation"],
-      content:
-        "AI is transforming the future of technology. Are you ready for it?",
-      image: "",
-      likes: "10K",
-      comments: "1K",
-      shares: "500",
-    },
-    {
-      id: 3,
-      name: "Joe joot",
-      profilePic: "https://i.pravatar.cc/40?img=1",
-      community: "Awesome Community",
-      time: "57m",
-      tags: ["Python", "Robots"],
-      content:
-        "Meet our new high-tech robot - efficient, precise, and ready to take on any challenge! Our new robot - the pinnacle of innovation and technology.",
-      image:
-        "https://images.unsplash.com/photo-1534723328310-e82dad3ee43f?w=700&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Nnx8YXJ0aWZpZmljaWFsJTIwaW50ZWxsaWdlbmNlfGVufDB8fDB8fHw%3D",
-      likes: "57K",
-      comments: "17K",
-      shares: "7",
-    },
-    {
-      id: 4,
-      name: "Markus Stone",
-      profilePic: "https://i.pravatar.cc/40?img=2",
-      community: "Tech Lovers",
-      time: "1h",
-      tags: ["AI", "Innovation"],
-      content:
-        "AI is transforming the future of technology. Are you ready for it? Our new robot - the pinnacle of innovation and technology. Artificial intelligence (AI) is a set of technologies that enable computers to perform a variety of advanced functions, including the ability to see, understand and translate spoken and written language, analyze data, make recommendations, and more.",
-      image:
-        "https://images.unsplash.com/photo-1526378722484-bd91ca387e72?q=80&w=1034&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-      likes: "10K",
-      comments: "1K",
-      shares: "500",
-    },
-  ]);
+  const token = useAuthStore((state) => state.token);
+  // const [posts, setPosts] = useState<any>([]);
+
+  const { setPosts } = usePostStore.getState()
+  const posts = usePostStore((state:any) => state.posts)
+
+  const getTimeAgo = (timestamp: string) => {
+    const now = new Date();
+    const postDate = new Date(timestamp);
+    const diffInSeconds = Math.floor((now.getTime() - postDate.getTime()) / 1000);
+    const diffInMinutes = Math.floor(diffInSeconds / 60);
+    const diffInHours = Math.floor(diffInMinutes / 60);
+    const diffInDays = Math.floor(diffInHours / 24);
+  
+    if (diffInMinutes < 1) return "Just now";
+    if (diffInMinutes < 60) return `${diffInMinutes} min ago`;
+    if (diffInHours < 24) return `${diffInHours} hours ago`;
+    if (diffInDays === 1) return "Yesterday";
+    if (diffInDays < 7) return `${diffInDays} days ago`;
+  
+    // Show full date if older than 7 days
+    return postDate.toLocaleDateString("en-US", { 
+      year: "numeric", 
+      month: "short", 
+      day: "numeric" 
+    });
+  };
+
+  const getAllPosts = async () => {
+    try {
+      const response = await axios.get("http://localhost:3000/posts/getAllPosts" , 
+      {
+        headers: { Authorization: token },
+      }
+      );
+
+      console.log(response , ">>res");
+      
+      const formattedInfo = response?.data?.posts.map((post: any) => ({
+        id: post._id,
+        name: post?.user?.name,
+        email: post?.user?.email,
+        profilePic: post?.user?.picture,
+        content: post?.content,
+        image: post?.image,
+        tags: post?.tags,
+        likes: post?.likes?.length,
+        comments: post?.comments?.length,
+        shares: post?.shares,
+        time: getTimeAgo(post?.createdAt),
+      }))
+      setPosts(formattedInfo);
+      console.log(response , ">>>res");
+      
+    } catch (error) {
+      console.error("Error fetching posts:", error);
+    }
+  };
+
+console.log(posts , ">>////");
+
+  useEffect(() => {
+    try{
+      getAllPosts();
+
+    }catch(err){
+      console.error(err);
+      toast.error("An error occurred while fetching all the posts");
+    }
+  },[])
 
   const [modalOpen, setModalOpen] = useState(false);
   const [postModalOpen, setPostModalOpen] = useState(false);
@@ -192,16 +239,6 @@ const FeedPage = () => {
           alignItems: "center",
         }}
       >
-        <Button
-          sx={{ position: "fixed" }}
-          variant="contained"
-          color="primary"
-          onClick={handleOpen}
-        >
-          Set Pincode
-        </Button>
-        <SetPinCodeModal open={modalOpen} onClose={handleClose} />
-
         <Button variant="contained" onClick={handlePostModalOpen}>
           Create Post
         </Button>
@@ -223,14 +260,23 @@ const FeedPage = () => {
           alignItems: "center",
         }}
       >
-        {posts.map((post) => (
+        {posts.map((post:any) => (
           <FeedCard key={post.id} post={post} />
         ))}
       </Box>
 
       {/* Right Section (20%) - Carousel */}
       <Box sx={{ width: "20%", display: "flex", justifyContent: "center" }}>
-        <CarouselComponent />
+        {/* <CarouselComponent /> */}
+        <Button
+          sx={{ position: "fixed" }}
+          variant="contained"
+          color="primary"
+          onClick={handleOpen}
+        >
+          Set Pincode
+        </Button>
+        <SetPinCodeModal open={modalOpen} onClose={handleClose} />
       </Box>
     </Box>
   );
