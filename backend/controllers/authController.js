@@ -45,7 +45,7 @@ exports.googleAuth = async (req, res) => {
 
         // Generate JWT token
         const token = jwt.sign({ userId: user._id, email: user.email }, JWT_SECRET, {
-            expiresIn: '1h',
+            expiresIn: '6h',
         });
 
         // Set token as HTTP-only cookie
