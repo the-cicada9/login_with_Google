@@ -16,7 +16,7 @@ const GoogleBtn = () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           credential: credentialResponse.credential,
-          client_id: '445124890168-k9lhipo1c6rmla8j5l3fsvc5qacvrvnb.apps.googleusercontent.com',
+          client_id: 'ClientId',
         }),
       });
 
